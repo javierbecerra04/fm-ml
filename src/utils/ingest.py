@@ -86,8 +86,19 @@ def parse_fm_html_table(html_path: Path) -> Tuple[pd.DataFrame, list[str]]:
     df = max(tables, key=lambda t: (t.shape[1], t.shape[0]))
     notes.append(f"picked_table_shape={df.shape}")
 
-    # Standardize columns
-    df.columns = [str(c).strip().replace("\n", " ") for c in df.columns]
+    # Standardize columns and ensure uniqueness
+    cols = [str(c).strip().replace("\n", " ") for c in df.columns]
+    # De-duplicate if the HTML produced repeated names
+    seen = {}
+    deduped: list[str] = []
+    for c in cols:
+        if c in seen:
+            seen[c] += 1
+            deduped.append(f"{c}__dup{seen[c]}")
+        else:
+            seen[c] = 0
+            deduped.append(c)
+    df.columns = deduped
 
     # Special handling
     df = _split_apps_column(df, "Apps")

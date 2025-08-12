@@ -59,5 +59,17 @@ def merge_squad_tables(html_tables: Dict[str, pd.DataFrame], key: str = "Player"
             df2 = df2.drop(columns=["Apps"]) 
         df2 = _rename_with_prefix(df2, prefix=k, key_cols=(key,))
         base = base.merge(df2, on=key, how="left", suffixes=(None, None))
+        # Ensure unique column names post-merge
+        seen = {}
+        unique_cols = []
+        for c in base.columns:
+            if c in seen:
+                seen[c] += 1
+                unique_cols.append(f"{c}__dup{seen[c]}")
+            else:
+                seen[c] = 0
+                unique_cols.append(c)
+        base.columns = unique_cols
 
+        return base
     return base
