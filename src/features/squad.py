@@ -50,26 +50,37 @@ def merge_squad_tables(html_tables: Dict[str, pd.DataFrame], key: str = "Player"
     for k, df in html_tables.items():
         if k == base_key:
             continue
-        if key not in df.columns:
-            # skip tables without the join key
-            continue
-        # Drop raw 'Apps' textual if present in any other table as well
+        
+        # Handle different column names for player identification
         df2 = df.copy()
+        player_col = None
+        if key in df2.columns:
+            player_col = key
+        elif "Name" in df2.columns:
+            player_col = "Name"
+            # Rename to match base table
+            df2 = df2.rename(columns={"Name": key})
+        
+        if player_col is None:
+            # skip tables without any player identification column
+            continue
+            
+        # Drop raw 'Apps' textual if present in any other table as well
         if "Apps" in df2.columns:
             df2 = df2.drop(columns=["Apps"]) 
         df2 = _rename_with_prefix(df2, prefix=k, key_cols=(key,))
         base = base.merge(df2, on=key, how="left", suffixes=(None, None))
-        # Ensure unique column names post-merge
-        seen = {}
-        unique_cols = []
-        for c in base.columns:
-            if c in seen:
-                seen[c] += 1
-                unique_cols.append(f"{c}__dup{seen[c]}")
-            else:
-                seen[c] = 0
-                unique_cols.append(c)
-        base.columns = unique_cols
+        
+    # Ensure unique column names post-merge
+    seen = {}
+    unique_cols = []
+    for c in base.columns:
+        if c in seen:
+            seen[c] += 1
+            unique_cols.append(f"{c}__dup{seen[c]}")
+        else:
+            seen[c] = 0
+            unique_cols.append(c)
+    base.columns = unique_cols
 
-        return base
     return base

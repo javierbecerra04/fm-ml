@@ -105,8 +105,11 @@ def parse_fm_html_table(html_path: Path) -> Tuple[pd.DataFrame, list[str]]:
     df = _clean_player_name(df, "Player")
 
     # Coerce numeric where possible (handles %, commas, '-')
+    # Skip known text columns that should remain as strings
+    text_columns = {'Player', 'Name', 'Position Selected', 'Personality', 'Inf'}
     for c in df.columns:
-        df[c] = _coerce_numeric_with_percent(df[c])
+        if c not in text_columns:
+            df[c] = _coerce_numeric_with_percent(df[c])
 
     return df, notes
 
