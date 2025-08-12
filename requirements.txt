@@ -7,3 +7,4 @@ lightgbm
 shap
 umap-learn
 pyarrow
+lxml

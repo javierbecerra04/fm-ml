@@ -43,14 +43,17 @@ def _coerce_numeric_with_percent(col: pd.Series) -> pd.Series:
 
 
 def _split_apps_column(df: pd.DataFrame, col_name: str = "Apps") -> pd.DataFrame:
-    """Split an 'Apps' column like '26 (1)' into numeric 'apps' and 'apps_subs'."""
+    """Split an 'Apps' column like '26 (1)' into numeric 'apps' and 'apps_subs'.
+
+    Drops the original textual column to prevent duplicate 'apps' later.
+    """
     if col_name in df.columns:
         s = df[col_name].astype(str).str.strip()
         apps = s.str.extract(r"^(\d+)")[0]
         subs = s.str.extract(r"\((\d+)\)")[0]
         df["apps"] = pd.to_numeric(apps, errors="coerce")
         df["apps_subs"] = pd.to_numeric(subs, errors="coerce").fillna(0).astype("Int64")
-        # keep original too, but you can drop if desired
+        df = df.drop(columns=[col_name])
     return df
 
 
