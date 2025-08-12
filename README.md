@@ -24,6 +24,17 @@ fm-ml/
 ## Quickstart
 
 1. Export FM data to CSV into `data/raw/`.
-2. Install requirements: `pip install -r requirements.txt`
-3. Start with `notebooks/00_ingest_and_clean.ipynb`.
+2. Create a virtual env and install requirements.
+3. Open `notebooks/00_ingest_and_clean.ipynb` to explore, or use the utils:
+
+Python usage:
+
+```python
+from src.utils.ingest import load_raw_csvs, save_interim
+
+raw = load_raw_csvs()
+# e.g., clean one table then save
+# cleaned = some_clean_fn(raw['players'])
+# save_interim(cleaned, 'players_cleaned')
+```
 
